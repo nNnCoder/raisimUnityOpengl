@@ -333,7 +333,6 @@ namespace raisimUnity
                     _style.fontSize = Mathf.RoundToInt(14 + (Screen.dpi - 100.0f) * 0.1f);
             }
 
-            
             GUILayout.BeginArea(new Rect(Screen.width - _state.Length*_style.fontSize/2, Screen.height-_style.fontSize*2, _state.Length*_style.fontSize/2, _style.fontSize*2), _style);  
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();

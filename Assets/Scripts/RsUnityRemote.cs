@@ -256,8 +256,7 @@ namespace raisimUnity
                             try
                             {
                                 // Server hibernating
-                                ClearScene();
-                                _tcpHelper.CloseConnection();
+                                CloseConnection();
                                 _clientStatus = ClientStatus.InitializingObjects;
                                 ReadAndCheckServer(ClientMessageType.RequestServerStatus);
                             }
@@ -408,11 +407,9 @@ namespace raisimUnity
                     // Modal view
                     // _errorModalView.Show(true);
                     // _errorModalView.SetMessage(e.Message);
-                    GameObject.Find("_CanvasSidebar").GetComponent<UIController>().setState(e.Message);
+                    // GameObject.Find("_CanvasSidebar").GetComponent<UIController>().setState(e.Message);
 
                     _clientStatus = ClientStatus.Idle;
-                    ClearScene();
-                    
                     // Close connection
                     _tcpHelper.CloseConnection();
                 }
@@ -1415,13 +1412,10 @@ namespace raisimUnity
             }
             else if (state == ServerStatus.StatusHibernating)
             {
-                _clientStatus = ClientStatus.Idle;
                 return ServerMessageType.Reset;
             }
-            else
-            {
-                return _tcpHelper.GetDataServerMessageType();
-            }
+            
+            return _tcpHelper.GetDataServerMessageType();
         }
 
         private bool UpdateContacts()
