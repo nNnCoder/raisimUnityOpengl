@@ -315,19 +315,21 @@ namespace raisimUnity
                 }
             }
 
-            Mesh mesh = new Mesh();
-            mesh.indexFormat = IndexFormat.UInt32;
-            mesh.vertices = vertices.ToArray();
-            mesh.triangles = indices.ToArray();
-            mesh.uv = uvs.ToArray();
-            if (!recomputeNormal) mesh.normals = normals.ToArray();
-            else mesh.RecalculateNormals();
-
             var terrain = new GameObject("terrain");
             terrain.transform.SetParent(root.transform, true);
             terrain.AddComponent<MeshFilter>();
             terrain.AddComponent<MeshRenderer>();
-            terrain.GetComponent<MeshFilter>().mesh = mesh;
+            terrain.GetComponent<MeshFilter>().mesh = new Mesh();
+
+            terrain.GetComponent<MeshFilter>().mesh.indexFormat = IndexFormat.UInt32;
+            terrain.GetComponent<MeshFilter>().mesh.vertices = vertices.ToArray();
+            terrain.GetComponent<MeshFilter>().mesh.triangles = indices.ToArray();
+            terrain.GetComponent<MeshFilter>().mesh.uv = uvs.ToArray();
+
+            if (!recomputeNormal) 
+                terrain.GetComponent<MeshFilter>().mesh.normals = normals.ToArray();
+            else 
+                terrain.GetComponent<MeshFilter>().mesh.RecalculateNormals();            
 
             return terrain;
         }
