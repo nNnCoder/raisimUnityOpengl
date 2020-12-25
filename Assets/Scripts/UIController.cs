@@ -33,6 +33,8 @@ using UnityEngine.UIElements;
 using Button = UnityEngine.UI.Button;
 using Slider = UnityEngine.UI.Slider;
 using Toggle = UnityEngine.UI.Toggle;
+using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.Rendering;
 
 namespace raisimUnity
 {
@@ -81,7 +83,8 @@ namespace raisimUnity
         private Thread _autoConnectThread;
 
         private List<string> _lookAtOptions;
-        
+        private List<string> _SkyOptions;
+
         private void Start()
         {
             _remote = GameObject.Find("RaiSimUnity").GetComponent<RsUnityRemote>();
@@ -148,6 +151,10 @@ namespace raisimUnity
                 
                 var sliderBodyFrames = GameObject.Find(_SliderBodyFramesName).GetComponent<Slider>();
                 sliderBodyFrames.onValueChanged.AddListener((value) => { _remote.BodyFrameMarkerScale = value; });
+
+                var sliderLight = GameObject.Find("_LightSlider").GetComponent<Slider>();
+                sliderLight.onValueChanged.AddListener((value) => { GameObject.Find("Directional Light").transform.localRotation = Quaternion.Euler(50, value, 0); });
+
                 var toggleBodyFrames = GameObject.Find(_ToggleBodyFramesName).GetComponent<Toggle>();
                 toggleBodyFrames.onValueChanged.AddListener((isSelected) =>
                 {
@@ -247,6 +254,9 @@ namespace raisimUnity
                     RefereshScrollResources();
                 });
             }
+
+            if (GraphicsSettings.renderPipelineAsset is HDRenderPipelineAsset)
+                ConstructSkyHDRP();
         }
 
         private void TryConnect()
@@ -294,6 +304,43 @@ namespace raisimUnity
             {
                 _camera.Follow(_lookAtOptions[dropdown.value]);
             }
+        }
+
+        public void ConstructSkyHDRP()
+        {
+            var SkyDropdown = GameObject.Find("_SkyDropDown").GetComponent<Dropdown>();
+            _SkyOptions = new List<string>();
+            foreach (var option in _remote._skyNames)
+            {
+                _SkyOptions.Add(option); // Or whatever you want for a label
+            }
+
+            SkyDropdown.ClearOptions();
+            SkyDropdown.AddOptions(_SkyOptions);
+            SkyDropdown.onValueChanged.AddListener(delegate {
+                ChangeSky(SkyDropdown);
+                DynamicGI.UpdateEnvironment();
+            });
+        }
+
+        private void ChangeSky(Dropdown dropdown)
+        {            
+            GameObject volume = GameObject.Find("Sky");
+            HDRISky sky;
+            volume.GetComponent<Volume>().profile.TryGet<HDRISky>(out sky);
+            sky.hdriSky.value = _remote._skyCubemaps[dropdown.value];
+
+            if(dropdown.value == 7)
+            {
+                _camera.GetComponent<Camera>().GetComponent<HDAdditionalCameraData>().clearColorMode = HDAdditionalCameraData.ClearColorMode.Color;
+                _camera.GetComponent<Camera>().GetComponent<HDAdditionalCameraData>().backgroundColorHDR = Color.white;
+                _camera.GetComponent<Camera>().GetComponent<HDAdditionalCameraData>().volumeLayerMask = 0;
+            } else
+            {
+                _camera.GetComponent<Camera>().GetComponent<HDAdditionalCameraData>().clearColorMode = HDAdditionalCameraData.ClearColorMode.Sky;
+                _camera.GetComponent<Camera>().GetComponent<HDAdditionalCameraData>().volumeLayerMask = 1;
+            }
+            
         }
 
         public void ConstructLookAt()

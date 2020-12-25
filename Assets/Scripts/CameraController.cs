@@ -276,7 +276,7 @@ public class CameraController : MonoBehaviour
         }
 
         var view = cam.ScreenToViewportPoint(Input.mousePosition);
-        if (view == _cursorPosition)
+        if (view[0] < 0 || view[0] > 0.2 || view[1] > 1 || view[1] < 0)
         {
             _cursorStaticCount++;
         }
